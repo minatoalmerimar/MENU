@@ -7,16 +7,60 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background-color: #111; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 10px 0; }
-    #pdf-container { width: 100%; max-width: 800px; display: flex; flex-direction: column; align-items: center; }
-    canvas { width: 96% !important; height: auto !important; margin-bottom: 12px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.6); }
-    .loading { color: #fff; font-family: sans-serif; margin-top: 40px; font-size: 16px; }
+    body { background-color: #111; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding-top: 50px; padding-bottom: 70px; }
+
+    /* 顶部分类导航栏 */
+    .top-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background: rgba(20, 20, 20, 0.95); backdrop-filter: blur(8px);
+      display: flex; overflow-x: auto; white-space: nowrap; padding: 10px;
+      border-bottom: 1px solid #333; -webkit-overflow-scrolling: touch;
+    }
+    .top-nav::-webkit-scrollbar { display: none; }
+    .nav-btn {
+      background: #222; color: #ccc; border: 1px solid #444;
+      padding: 6px 14px; border-radius: 20px; font-size: 13px;
+      margin-right: 8px; text-decoration: none; cursor: pointer; flex-shrink: 0;
+    }
+    .nav-btn:active { background: #e63946; color: #fff; border-color: #e63946; }
+
+    /* PDF 容器 */
+    #pdf-container { width: 100%; max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; }
+    canvas { width: 96% !important; height: auto !important; margin-top: 10px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.6); }
+    .loading { color: #fff; text-align: center; margin-top: 50px; font-size: 16px; }
+
+    /* 底部悬浮栏 */
+    .bottom-bar {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;
+      background: #1a1a1a; display: flex; justify-content: space-around;
+      padding: 10px 0; border-top: 1px solid #333;
+    }
+    .bottom-btn {
+      color: #fff; text-decoration: none; font-size: 12px;
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+    }
+    .bottom-btn span { font-size: 18px; }
   </style>
 </head>
 <body>
 
+  <!-- 顶部分类导航栏 (支持点击跳转对应页码) -->
+  <nav class="top-nav">
+    <button class="nav-btn" onclick="scrollToPage(2)">Entrantes</button>
+    <button class="nav-btn" onclick="scrollToPage(5)">Ramen & Arroz</button>
+    <button class="nav-btn" onclick="scrollToPage(7)">Nigiri & Uramaki</button>
+    <button class="nav-btn" onclick="scrollToPage(16)">Combos</button>
+  </nav>
+
   <div id="loading" class="loading">Cargando menú...</div>
   <div id="pdf-container"></div>
+
+  <!-- 底部悬浮快捷栏 -->
+  <div class="bottom-bar">
+    <a href="tel:+34600000000" class="bottom-btn"><span>📞</span>Llamar</a>
+    <a href="https://maps.google.com/?q=Minato+Almerimar" target="_blank" class="bottom-btn"><span>📍</span>Ubicación</a>
+    <a href="javascript:alert('Horario: 12:30 - 16:30 | 19:30 - 23:30')" class="bottom-btn"><span>🕒</span>Horario</a>
+  </div>
 
   <script>
     const url = 'menu.pdf';
@@ -24,10 +68,10 @@
 
     const container = document.getElementById('pdf-container');
     const loading = document.getElementById('loading');
+    const pageCanvasMap = {};
 
     pdfjsLib.getDocument(url).promise.then(async (pdf) => {
       loading.style.display = 'none';
-      // 逐页顺序渲染，防止内存暴涨
       for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
         await renderPage(pdf, pageNum);
       }
@@ -37,21 +81,27 @@
 
     function renderPage(pdf, pageNum) {
       return pdf.getPage(pageNum).then(page => {
-        // scale 设为 1.25，清晰度够用且内存大幅降低，不会导致 iOS 崩溃
         const viewport = page.getViewport({ scale: 1.25 });
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         
         canvas.height = viewport.height;
         canvas.width = viewport.width;
+        canvas.id = 'page-' + pageNum;
 
         container.appendChild(canvas);
+        pageCanvasMap[pageNum] = canvas;
 
-        return page.render({
-          canvasContext: ctx,
-          viewport: viewport
-        }).promise;
+        return page.render({ canvasContext: ctx, viewport: viewport }).promise;
       });
+    }
+
+    // 点击分类跳转对应 PDF 页码
+    function scrollToPage(pageNum) {
+      const targetCanvas = document.getElementById('page-' + pageNum);
+      if (targetCanvas) {
+        targetCanvas.scrollIntoView({ behavior: 'smooth' });
+      }
     }
   </script>
 </body>
