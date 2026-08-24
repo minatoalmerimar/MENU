@@ -4,6 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0">
   <title>Menú - Minato</title>
+  
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=AW-18404630770"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'AW-18404630770');
+  </script>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -58,7 +68,7 @@
   <!-- 底部悬浮快捷栏 -->
   <div class="bottom-bar">
     <a href="tel:+34681888772" class="bottom-btn"><span>📞</span>Llamar</a>
-    <a href="https://maps.app.goo.gl/Yo6SBHY6uKHjJUTd6" target="_blank" class="bottom-btn"><span>📍</span>Ubicación</a>
+    <a href="https://maps.app.goo.gl/Yo6SBHY6uKHjJUTd6" target="_blank" class="bottom-btn" onclick="trackConversion()"><span>📍</span>Ubicación</a>
     <a href="https://www.instagram.com/minato.almerimar?igsh=MTFrem41ZHg5ZnFmeA==" target="_blank" class="bottom-btn"><span>📸</span>Instagram</a>
     <a href="javascript:alert('Horario: 12:30 - 16:30 | 19:30 - 00:00')" class="bottom-btn"><span>🕒</span>Horario</a>
   </div>
@@ -103,6 +113,15 @@
       if (targetCanvas) {
         targetCanvas.scrollIntoView({ behavior: 'smooth' });
       }
+    }
+
+    // Google Ads 转化事件（追踪“如何前往/地图点击”）
+    function trackConversion() {
+      gtag('event', 'conversion', {
+        'send_to': 'AW-18404630770/pe68CPml8eYcEPLBgchE',
+        'value': 1.0,
+        'currency': 'EUR'
+      });
     }
   </script>
 </body>
